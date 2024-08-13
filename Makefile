@@ -42,7 +42,6 @@ gen-temp-pb-go: protoc-gen-gogoroach $(TEMP_GO_SOURCE) ## Regenerate the pb.go f
 $(TEMP_GO_SOURCE): $(PROTO)
 	PATH=$$PATH:$(LOCAL_BIN) protoc \
 		-I. \
-		--go_out=$(TEMP_GO_ROOT) \
 		--gogoroach_out=Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,plugins=grpc,import_prefix=:. \
 		$^
 	$(SED) $(SED_INPLACE) -E \
