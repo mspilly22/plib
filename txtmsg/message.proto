@@ -4,6 +4,7 @@ option go_package = "github.com/mspilly22/plib/txtmsg";
 
 message Payload {
   string text = 1;
+  string desc = 3;
   PayloadType type = 2;
 }
 
