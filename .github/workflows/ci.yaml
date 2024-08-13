@@ -2,7 +2,9 @@ name: ci
 
 on:
   push:
+    [ main ]
   pull_request:
+    [ main ]
 
 jobs:
   check:
@@ -22,11 +24,6 @@ jobs:
 
       - name: Install Protoc
         uses: arduino/setup-protoc@v3
-
-      - name: Install Protoc plugins
-        run: |
-          #go install github.com/gogo/protobuf/protoc-gen-gogo@latest
-          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 
       - name: Verify pb.go is up to date (${{ matrix.go }})
         run: make verify-pb-go-up-to-date
