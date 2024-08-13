@@ -1,0 +1,29 @@
+name: ci
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go:
+          - "1.21"
+          - "1.22"
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go (${{ matrix.go }}
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go }}
+
+      - name: Verify pb.go is up to date (${{ matrix.go }})
+        run: make verify-pb-go-up-to-date
+
+      - name: Test pb.go (${{ matrix.go }})
+        run: make test
