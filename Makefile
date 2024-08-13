@@ -9,8 +9,8 @@ export SHELL := env PWD=$(CURDIR) bash
 PROTO_DIR = txtmsg
 PROTO = $(PROTO_DIR)/message.proto
 GO_SOURCE = $(PROTO_DIR)/message.pb.go
-TEMP_GO_ROOT = github.com/
-TEMP_GO_SOURCE = $(TEMP_GO_ROOT)/mspilly22/plib/$(GO_SOURCE)
+TEMP_GO_ROOT = gen/
+TEMP_GO_SOURCE = $(TEMP_GO_ROOT)/github.com/mspilly22/plib/$(GO_SOURCE)
 
 SED = sed
 SED_INPLACE := $(shell $(SED) --version 2>&1 | grep -q GNU && echo -i || echo "-i ''")
@@ -42,11 +42,7 @@ gen-temp-pb-go: protoc-gen-gogoroach $(TEMP_GO_SOURCE) ## Regenerate the pb.go f
 $(TEMP_GO_SOURCE): $(PROTO)
 	PATH=$$PATH:$(LOCAL_BIN) protoc \
 		-I. \
-		-I$$GOPATH/src/ \
-		-I$$GOPATH/src/github.com \
-		-I$$GOPATH/src/github.com/cockroachdb/errors \
-		-I$$GOPATH/src/github.com/gogo/protobuf \
-		-I$$GOPATH/src/github.com/gogo/protobuf/protobuf \
+		--go_out=$(TEMP_GO_ROOT) \
 		--gogoroach_out=Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,plugins=grpc,import_prefix=:. \
 		$^
 	$(SED) $(SED_INPLACE) -E \
