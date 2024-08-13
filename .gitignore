@@ -1,2 +1,2 @@
 bin/protoc-gen-gogoroach
-gen/github.com/
+github.com/

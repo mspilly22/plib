@@ -9,8 +9,8 @@ export SHELL := env PWD=$(CURDIR) bash
 PROTO_DIR = txtmsg
 PROTO = $(PROTO_DIR)/message.proto
 GO_SOURCE = $(PROTO_DIR)/message.pb.go
-TEMP_GO_ROOT = gen/
-TEMP_GO_SOURCE = $(TEMP_GO_ROOT)/github.com/mspilly22/plib/$(GO_SOURCE)
+TEMP_GO_ROOT = github.com/
+TEMP_GO_SOURCE = $(TEMP_GO_ROOT)/mspilly22/plib/$(GO_SOURCE)
 
 SED = sed
 SED_INPLACE := $(shell $(SED) --version 2>&1 | grep -q GNU && echo -i || echo "-i ''")
