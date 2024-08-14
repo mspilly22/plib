@@ -1,4 +1,4 @@
-default: help
+default: update
 
 LOCAL_BIN = ./bin
 PROTOC_PLUGIN = $(LOCAL_BIN)/protoc-gen-gogoroach
@@ -7,10 +7,10 @@ PROTOC_PLUGIN_SOURCE = cmd/protoc-gen-gogoroach/main.go
 export SHELL := env PWD=$(CURDIR) bash
 
 PROTO_DIR = txtmsg
-PROTO = $(PROTO_DIR)/message.proto
-GO_SOURCE = $(PROTO_DIR)/message.pb.go
-TEMP_GO_ROOT = github.com/
-TEMP_GO_SOURCE = $(TEMP_GO_ROOT)/mspilly22/plib/$(GO_SOURCE)
+PROTO = $(PROTO_DIR)/lease.proto
+GO_SOURCE = $(PROTO_DIR)/lease.pb.go
+TEMP_GO_ROOT = github.com
+TEMP_GO_SOURCE = $(TEMP_GO_ROOT)/cockroachdb/cockroach/pkg/sql/catalog/descpb/lease.pb.go
 
 SED = sed
 SED_INPLACE := $(shell $(SED) --version 2>&1 | grep -q GNU && echo -i || echo "-i ''")
@@ -37,11 +37,17 @@ protoc-gen-gogoroach: $(PROTOC_PLUGIN) ## Create the protoc-gen-gogoroach binary
 $(PROTOC_PLUGIN): $(PROTOC_PLUGIN_SOURCE)
 	go build -o $(PROTOC_PLUGIN) $^
 
+.PHONY: update
+update: gen-temp-pb-go refresh-pb-go verify-pb-go-up-to-date test ## Handles all of the steps to regenerate and verify a change
+
 .PHONY: gen-temp-pb-go
 gen-temp-pb-go: protoc-gen-gogoroach $(TEMP_GO_SOURCE) ## Regenerate the pb.go file in the temporary location
 $(TEMP_GO_SOURCE): $(PROTO)
+	go mod vendor
 	PATH=$$PATH:$(LOCAL_BIN) protoc \
 		-I. \
+		-I ./vendor/github.com/gogo/protobuf \
+		-I /usr/include \
 		--gogoroach_out=Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,plugins=grpc,import_prefix=:. \
 		$^
 	$(SED) $(SED_INPLACE) -E \
@@ -53,7 +59,8 @@ $(TEMP_GO_SOURCE): $(PROTO)
 	gofmt -s -w $(TEMP_GO_SOURCE)
 
 .PHONY: refresh-pb-go
-refresh-pb-go: $(TEMP_GO_SOURCE) $(GO_SOURCE) ## Copy the generated pb.go file from its temporary location to permanent location
+refresh-pb-go: $(GO_SOURCE) ## Copy the generated pb.go file from its temporary location to permanent location
+$(GO_SOURCE): $(TEMP_GO_SOURCE)
 	cp --preserve $(TEMP_GO_SOURCE) $(GO_SOURCE)
 
 .PHONY: verify-pb-go-up-to-date
@@ -64,3 +71,8 @@ verify-pb-go-up-to-date: gen-temp-pb-go ## This verifies that the generated prot
 test: ## Test the library
 	go test ./...
 
+.PHONY: clean
+clean: ## Clean up any temporary files
+	rm -rf vendor/ || :
+	rm $(PROTOC_PLUGIN) || :
+	rm $(TEMP_GO_SOURCE) || :
