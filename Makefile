@@ -40,6 +40,14 @@ $(PROTOC_PLUGIN): $(PROTOC_PLUGIN_SOURCE)
 .PHONY: update
 update: gen-temp-pb-go refresh-pb-go verify-pb-go-up-to-date test ## Handles all of the steps to regenerate and verify a change
 
+# We assume that protoc is installed along with development headers. On ubuntu,
+# the following commands handle this:
+# $> apt install protobuf-compiler
+# $> apt install libprotoc-dev
+#
+# For other systems, refer to the install instructions here:
+# https://grpc.io/docs/protoc-installation/
+
 .PHONY: gen-temp-pb-go
 gen-temp-pb-go: protoc-gen-gogoroach $(TEMP_GO_SOURCE) ## Regenerate the pb.go file in the temporary location
 $(TEMP_GO_SOURCE): $(PROTO)
